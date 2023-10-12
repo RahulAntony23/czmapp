@@ -9,10 +9,4 @@ class thought {
       required this.uid,
       required this.heading,
       required this.description});
-
-  static thought fromJson(json) => thought(
-      tid: json['tid'],
-      uid: json['uid'],
-      heading: json['heading'],
-      description: json['description']);
 }

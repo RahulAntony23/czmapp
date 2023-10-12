@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:czmapp/UpUser.dart';
@@ -22,17 +23,26 @@ class _HomeState extends State<Home> {
   int _currentIndex = 0;
   late PageController _pageController;
 
-  List<thought> thoughts = [];
+  List<thought> allthoughts = [];
 
-  Future<List> fetchthoughts() async {
+  Future<List<thought>> fetchthoughts() async {
     var response =
         await http.get(Uri.parse('http://10.0.2.2:8080/getallThoughts'));
 
     if (response.statusCode == 200) {
-      var thoughts = jsonDecode(response.body) as List;
-      return thoughts.map((thought) => thought.fromJson(thought)).toList();
+      var data = jsonDecode(response.body.toString());
+      print(data);
+      for (Map i in data) {
+        thought t = thought(
+            tid: i['tid'],
+            uid: i['uid'],
+            heading: i['heading'],
+            description: i['description']);
+        allthoughts.add(t);
+      }
+      return allthoughts;
     } else {
-      throw Exception('Failed to load thoughts');
+      return allthoughts;
     }
   }
 
@@ -68,11 +78,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     // Fetching all the thoughts
-    fetchthoughts().then((value) {
-      setState(() {
-        thoughts.addAll(value as Iterable<thought>);
-      });
-    });
+
     return MaterialApp(
         home: Scaffold(
       appBar: AppBar(
@@ -94,60 +100,67 @@ class _HomeState extends State<Home> {
           setState(() => _currentIndex = index);
         },
         children: [
-          // Home Page
-          ListView.builder(
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 20),
-                      Text(
-                        thoughts[index].heading,
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+          // Home Page (Thoughts) Page View
+          Container(
+            child: FutureBuilder<List<thought>>(
+                future: fetchthoughts(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return ListView.builder(
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${snapshot.data![index].heading}',
+                                  style: TextStyle(
+                                      color: Color.fromARGB(255, 255, 255, 255),
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  '${snapshot.data![index].description}',
+                                  style: TextStyle(
+                                      color: Color.fromARGB(255, 255, 255, 255),
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                                SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Posted by: ${snapshot.data![index].uid}',
+                                      style: TextStyle(
+                                          color: Color.fromARGB(
+                                              255, 255, 255, 255),
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          );
+                        });
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: Color.fromARGB(255, 0, 0, 0),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        thoughts[index].description,
-                        style: TextStyle(fontSize: 15),
-                      ),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              IconButton(
-                                  onPressed: () {}, icon: Icon(Icons.thumb_up)),
-                              Text('Like')
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              IconButton(
-                                  onPressed: () {}, icon: Icon(Icons.comment)),
-                              Text('Comment')
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              IconButton(
-                                  onPressed: () {}, icon: Icon(Icons.share)),
-                              Text('Share')
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      Divider(
-                        thickness: 1,
-                      )
-                    ],
-                  ),
-                );
-              }),
+                    );
+                  }
+                }),
+          ),
 
           // Post Page
           Container(
@@ -177,14 +190,25 @@ class _HomeState extends State<Home> {
                   maxLines: 9,
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                    onPressed: () {
-                      postthought();
-                    },
-                    child: Text('Post',
-                        style: TextStyle(
-                            fontSize: 20,
-                            color: Color.fromARGB(255, 255, 255, 255))))
+                GestureDetector(
+                  onTap: () {
+                    postthought();
+                  },
+                  child: Container(
+                    height: 50,
+                    width: 200,
+                    decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Center(
+                      child: Text('Post',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -246,10 +270,21 @@ class _HomeState extends State<Home> {
             _pageController.jumpToPage(index);
           },
           items: <BottomNavyBarItem>[
-            BottomNavyBarItem(icon: Icon(Icons.home), title: Text('Home')),
             BottomNavyBarItem(
-                icon: Icon(Icons.chat_bubble), title: Text('Post')),
-            BottomNavyBarItem(icon: Icon(Icons.person), title: Text('Profile')),
+                icon: Icon(Icons.home),
+                title: Text('Home'),
+                activeColor: Color.fromARGB(255, 0, 0, 0),
+                inactiveColor: Color.fromARGB(255, 138, 138, 138)),
+            BottomNavyBarItem(
+                icon: Icon(Icons.chat_bubble),
+                title: Text('Post'),
+                activeColor: Color.fromARGB(255, 0, 0, 0),
+                inactiveColor: Color.fromARGB(255, 138, 138, 138)),
+            BottomNavyBarItem(
+                icon: Icon(Icons.person),
+                title: Text('Profile'),
+                activeColor: Color.fromARGB(255, 0, 0, 0),
+                inactiveColor: Color.fromARGB(255, 138, 138, 138)),
           ]),
     ));
   }
