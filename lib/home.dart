@@ -113,15 +113,17 @@ class _HomeState extends State<Home> {
                             margin: const EdgeInsets.all(10),
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 0, 0, 0),
-                                borderRadius: BorderRadius.circular(10)),
+                                color: Color.fromARGB(255, 255, 255, 255),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: Color.fromARGB(255, 0, 0, 0))),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   '${snapshot.data![index].heading}',
                                   style: TextStyle(
-                                      color: Color.fromARGB(255, 255, 255, 255),
+                                      color: Color.fromARGB(255, 0, 0, 0),
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -129,25 +131,24 @@ class _HomeState extends State<Home> {
                                 Text(
                                   '${snapshot.data![index].description}',
                                   style: TextStyle(
-                                      color: Color.fromARGB(255, 255, 255, 255),
+                                      color: Color.fromARGB(255, 1, 1, 1),
                                       fontSize: 15,
                                       fontWeight: FontWeight.w400),
                                 ),
                                 SizedBox(height: 10),
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      'Posted by: ${snapshot.data![index].uid}',
-                                      style: TextStyle(
-                                          color: Color.fromARGB(
-                                              255, 255, 255, 255),
-                                          fontSize: 8,
-                                          fontWeight: FontWeight.w400),
-                                    ),
+                                    IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(Icons.thumb_up)),
+                                    IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(Icons.comment)),
+                                    IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(Icons.share)),
                                   ],
-                                )
+                                ),
                               ],
                             ),
                           );

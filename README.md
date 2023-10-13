@@ -1,16 +1,21 @@
 # czmapp
 
-A new Flutter project.
+Project CzmApp for Crezam.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This project is the Flutter application for the czmapp ecosystem.
 
-A few resources to get you started if this is your first Flutter project:
+### Installation steps
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Download the app and install on clients Mobile Phone .
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+2. Open and app and login or signup to service . 
+
+3.1. Home Screen shows the list of posts 
+
+3.2. Posting Screen helps you post your own posts.
+
+3.3. Profile screen , lets you change your profile details.
+
+
