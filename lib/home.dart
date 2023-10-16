@@ -8,6 +8,7 @@ import 'package:czmapp/signin.dart';
 import 'package:czmapp/thought.dart';
 import 'package:czmapp/user.dart';
 import 'package:flutter/material.dart';
+import 'thought_functions/thought_functions.dart';
 import 'package:http/http.dart' as http;
 
 class Home extends StatefulWidget {
@@ -31,13 +32,15 @@ class _HomeState extends State<Home> {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body.toString());
-      print(data);
+
       for (Map i in data) {
         thought t = thought(
             tid: i['tid'],
             uid: i['uid'],
             heading: i['heading'],
-            description: i['description']);
+            description: i['description'],
+            likes: i['likes'],
+            isLiked: false);
         allthoughts.add(t);
       }
       return allthoughts;
@@ -49,23 +52,6 @@ class _HomeState extends State<Home> {
   // Posting a thought
   TextEditingController _titleController = TextEditingController();
   TextEditingController _PostController = TextEditingController();
-
-  void postthought() async {
-    var reqBody = {
-      "uid": widget.user.id,
-      "heading": _titleController.text,
-      "description": _PostController.text
-    };
-
-    var response = await http.post(
-        Uri.parse('http://10.0.2.2:8080/saveThought'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(reqBody));
-
-    if (response.statusCode == 200) {
-      showMessage("Post Added Successfully");
-    }
-  }
 
   //Intitializing the page controller
   @override
@@ -139,14 +125,54 @@ class _HomeState extends State<Home> {
                                 Row(
                                   children: [
                                     IconButton(
-                                        onPressed: () {},
-                                        icon: Icon(Icons.thumb_up)),
+                                        onPressed: () {
+                                          if (snapshot.data![index].isLiked ==
+                                              false) {
+                                            addlike(snapshot.data![index].tid,
+                                                snapshot.data![index].likes);
+                                            snapshot.data![index].isLiked =
+                                                true;
+                                            showMessage("Post Liked");
+                                          } else if (snapshot
+                                                  .data![index].isLiked ==
+                                              true) {
+                                            removelike(
+                                                snapshot.data![index].tid,
+                                                snapshot.data![index].likes);
+                                            snapshot.data![index].isLiked =
+                                                false;
+                                            showMessage("Post Unliked");
+                                          }
+                                        },
+                                        icon: Icon(
+                                          Icons.thumb_up,
+                                          color: snapshot.data![index].isLiked
+                                              ? const Color.fromARGB(
+                                                  255, 0, 0, 0)
+                                              : const Color.fromARGB(
+                                                  255, 109, 109, 109),
+                                        )),
+                                    Text(
+                                      '${snapshot.data![index].likes}',
+                                      style: TextStyle(
+                                          color: Color.fromARGB(255, 0, 0, 0),
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400),
+                                    ),
                                     IconButton(
                                         onPressed: () {},
-                                        icon: Icon(Icons.comment)),
+                                        icon: Icon(
+                                          Icons.comment,
+                                          color: Color.fromARGB(
+                                              255, 109, 109, 109),
+                                        )),
                                     IconButton(
                                         onPressed: () {},
-                                        icon: Icon(Icons.share)),
+                                        icon: Icon(
+                                          Icons.share,
+                                          color: Color.fromARGB(
+                                              255, 109, 109, 109),
+                                        )),
                                   ],
                                 ),
                               ],
@@ -193,7 +219,10 @@ class _HomeState extends State<Home> {
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    postthought();
+                    postthought(widget.user.id, _titleController.text,
+                        _PostController.text);
+                    _titleController.clear();
+                    _PostController.clear();
                   },
                   child: Container(
                     height: 50,
@@ -264,6 +293,8 @@ class _HomeState extends State<Home> {
           )
         ],
       )),
+
+      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavyBar(
           selectedIndex: _currentIndex,
           onItemSelected: (index) {

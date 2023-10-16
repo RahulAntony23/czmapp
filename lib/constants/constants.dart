@@ -6,7 +6,7 @@ void showMessage(String message) => Fluttertoast.showToast(
     toastLength: Toast.LENGTH_SHORT,
     gravity: ToastGravity.CENTER,
     timeInSecForIosWeb: 1,
-    backgroundColor: Colors.red,
+    backgroundColor: const Color.fromARGB(255, 0, 0, 0),
     textColor: Colors.white,
     fontSize: 16.0);
 
@@ -20,7 +20,7 @@ showLoaderDialog(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const CircularProgressIndicator(
-              color: Color.fromARGB(255, 0, 191, 83),
+              color: Color.fromARGB(255, 0, 0, 0),
             ),
             const SizedBox(
               height: 10,
